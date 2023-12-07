@@ -165,6 +165,42 @@ int CA_setup_rule_wprob(CellularAutomata &CA, int rule_type, double prob)
     return 0;
 }
 
+// Retrieve all valid neighbor coordinates given a cell coordinate
+vector<vector<int>> get_neighborhood(CellularAutomata &CA, vector<int> coord)
+{
+    // Boudnary check already performed in update functions
+    int x = coord[0];
+    int y = coord[1];
+
+    int radius = CA.message_radius;
+    vector<vector<int>> res; // Result vector for storing all valid neighbor coordinates
+
+    for (int dx = -radius; dx <= radius; ++dx) {
+        for (int dy = -radius; dy <= radius; ++dy) {
+            // Skip center cell
+            // Skip corner neighbors for Von Neumann neighborhood type
+            if ((dx == 0 && dy == 0) || (CA.neighbor_type == VONNEUMANN && abs(dx) + abs(dy) > radius)) {
+                continue;
+            }
+            // Get neighbor coordinate
+            int nx = x + dx;
+            int ny = y + dy;
+
+            // Adjust for periodic boundaries
+            if (CA.bound_type == PERIODIC) {
+                nx = (nx + CA.dim1) % CA.dim1;
+                ny = (ny + CA.dim2) % CA.dim2;
+            }
+
+            // Add valid coordinate to result vector
+            if (nx >= 0 && nx < CA.dim1 && ny >= 0 && ny < CA.dim2) {
+                res.push_back({nx, ny});
+            }
+        }
+    }
+    return res;
+}
+
 // Message passing update function for the majority rule
 int majority_rule_update(CellularAutomata &CA, vector<int> coord, int nth_feature)
 {
@@ -176,50 +212,15 @@ int majority_rule_update(CellularAutomata &CA, vector<int> coord, int nth_featur
         cout<<"Invalid coordinate or feature index!"<<endl;
         return -1;
     }
+    // Get the neighbors of coordinate
+    vector<vector<int>> neighbors = get_neighborhood(CA, coord);
 
-    int radius = CA.message_radius;
     // Map for storing frequency
     map<int, int> frequencyMap;
-
-    for (int d = 1; d <= radius; ++d) {
-        // Get the coordinate values for the 4 directions
-        int left = x - d;
-        int right = x + d;
-        int top = y - d;
-        int bottom = y + d;
-
-        if (CA.bound_type == PERIODIC) {
-            // Modify the 4 values for periodic boundary type
-            left = (left + CA.dim1) % CA.dim1;
-            right = (right + CA.dim1) % CA.dim1;
-            top = (top + CA.dim2) % CA.dim2;
-            bottom = (bottom + CA.dim2) % CA.dim2;
-        }
-        // Create a vector storing to be added coordinates
-        vector<vector<int>> to_be_added;
-        if (CA.neighbor_type == VONNEUMANN) {
-            // Only add north, south, west, east for Von Neumann neighbor rule
-            to_be_added = {{left, y}, {right, y}, {x, top}, {x, bottom}};
-        }
-        else {
-            // Add all adjacent cells for Moore neighbor rule
-            to_be_added = {{left, y}, {right, y}, {x, top}, {x, bottom}, {left, top}, 
-                            {left, bottom}, {right, top}, {right, bottom}};
-        }
-        // Loop through all the coordinates in the to_be_added vector, and record the frequency
-        for (const auto &coord : to_be_added) {
-            
-            int x_coord = coord[0];
-            int y_coord = coord[1];
-            
-            if (x_coord >= CA.dim1 || x_coord < 0 || y_coord >= CA.dim2 || y_coord < 0) {
-                continue; // Continue if coordinate is out of bounds
-            }
-            // Add one count to that specific value
-            frequencyMap[CA.grid[x_coord][y_coord][nth_feature]]++;
-        }
+    for (const auto &coord: neighbors) {
+        frequencyMap[CA.grid[x][y][nth_feature]]++;
     }
-
+    // Get the value with the maximum frequency
     int maxFrequencyValue = 0;
     int maxFrequency = 0;
     for (const auto &entry : frequencyMap) {
@@ -228,6 +229,6 @@ int majority_rule_update(CellularAutomata &CA, vector<int> coord, int nth_featur
             maxFrequencyValue = entry.first;
         }
     }
-    // Update cell value the highest frequency value
-    CA.grid[x][y][nth_feature] = maxFrequencyValue;
+    // Return cell value the highest frequency value
+    return maxFrequencyValue;
 }

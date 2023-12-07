@@ -51,5 +51,8 @@ int CA_setup_rule(CellularAutomata &CA,int rule_type);
 // Set up rule for the cells with probability
 int CA_setup_rule_wprob(CellularAutomata &CA,int rule_type, double prob);
 
+// Retrieve all valid neighbor coordinates given a cell coordinate
+vector<vector<int>> get_neighborhood(CellularAutomata &CA, vector<int> coord);
+
 // Message passing update function for the majority rule
 int majority_rule_update(CellularAutomata &CA, vector<int> coord, int nth_feature);
