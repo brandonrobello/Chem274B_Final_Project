@@ -18,13 +18,13 @@ int CA_setup_dimension(CellularAutomata &CA, int ndims, int dim1, int dim2, int 
     for (int i = 0; i < dim1; ++i) {
         if (ndims == 1) {
             CA.grid[i].resize(1); // Single column in 1D
-            CA.grid[i][0].resize(n_feats); // Resize each cell according to feature dimension
+            // CA.grid[i][0].resize(n_feats); // Resize each cell according to feature dimension
         } 
         else { // ndims == 2
             CA.grid[i].resize(dim2);
-            for (int j = 0; j < dim2; ++j) {
-                CA.grid[i][j].resize(n_feats);
-            }
+            //for (int j = 0; j < dim2; ++j) {
+                // CA.grid[i][j].resize(n_feats);
+            //}
         }
     }
     // Successful setup
@@ -85,16 +85,16 @@ int CA_setup_boundtype(CellularAutomata &CA,int bound_type, int radius)
         return -1;
     }
 }
-// Cell states setup for the cellular automaton
-// nth_feature: indicates the feature index to update the value with
+// Cell features setup for the cellular automaton
+// feature: indicates the feature index to update the value with
 // val: value that will be used to update the cells
-int CA_setup_cell_states(CellularAutomata &CA, vector<vector<int>> coords, int nth_feature, int val)
+int CA_setup_cell_features(CellularAutomata &CA, vector<vector<int> > coords, string feature, int val)
 {
     // Ssanity check for feature index value
-    if (nth_feature >= CA.n_feats || nth_feature < 0) {
-        cout<<"Invalid feature index!"<<endl;
-        return -1;
-    }
+    //if (nth_feature >= CA.n_feats || nth_feature < 0) {
+    //    cout<<"Invalid feature index!"<<endl;
+    //    return -1;
+    //}
     for (const vector<int> &coord : coords) {
         int x = coord[0];
         int y = coord[1];
@@ -103,20 +103,21 @@ int CA_setup_cell_states(CellularAutomata &CA, vector<vector<int>> coords, int n
             cout<<"Invalid coordinate out of bounds!"<<endl;
             return -1;
         }
-        CA.grid[x][y][nth_feature] = val; // Update cell's nth feature with new value
+        //CA.grid[x][y][nth_feature] = val; // Update cell's nth feature with new value
+        CA.grid[x][y].features[feature] = val;
     }
-    cout<<"Successfully setup cell states's feature "<< nth_feature << " with value " << val <<endl;
+    cout<<"Successfully setup cell states's feature "<< feature << " with value " << val <<endl;
     return 0;
 }
 
 // Probability x of cell entering state x when initialized
-int CA_init_cond(CellularAutomata &CA, vector<int> coord, int nth_feature, double prob, int val)
+int CA_init_cond(CellularAutomata &CA, vector<int> coord, string feature, double prob, int val)
 {
     // Ssanity check for feature index value
-    if (nth_feature >= CA.n_feats || nth_feature < 0) {
-        cout<<"Invalid feature index!"<<endl;
-        return -1;
-    }
+    // if (nth_feature >= CA.n_feats || nth_feature < 0) {
+    //    cout<<"Invalid feature index!"<<endl;
+    //    return -1;
+    //}
     int x = coord[0];
     int y = coord[1];
     // Boundary check for the coordinates
@@ -131,7 +132,7 @@ int CA_init_cond(CellularAutomata &CA, vector<int> coord, int nth_feature, doubl
 
     // Set the value based on probability
     if (randomValue <= prob) {
-        CA.grid[x][y][nth_feature] = val;
+        CA.grid[x][y].features[feature] = val;
     }
     return 0;
 }
@@ -166,14 +167,14 @@ int CA_setup_rule_wprob(CellularAutomata &CA, int rule_type, double prob)
 }
 
 // Retrieve all valid neighbor coordinates given a cell coordinate
-vector<vector<int>> get_neighborhood(CellularAutomata &CA, vector<int> coord)
+vector<vector<int> > get_neighborhood(CellularAutomata &CA, vector<int> coord)
 {
     // Boudnary check already performed in update functions
     int x = coord[0];
     int y = coord[1];
 
     int radius = CA.message_radius;
-    vector<vector<int>> res; // Result vector for storing all valid neighbor coordinates
+    vector<vector<int> > res; // Result vector for storing all valid neighbor coordinates
 
     for (int dx = -radius; dx <= radius; ++dx) {
         for (int dy = -radius; dy <= radius; ++dy) {
@@ -202,23 +203,25 @@ vector<vector<int>> get_neighborhood(CellularAutomata &CA, vector<int> coord)
 }
 
 // Message passing update function for the majority rule
-int majority_rule_update(CellularAutomata &CA, vector<int> coord, int nth_feature)
+int majority_rule(CellularAutomata &CA, vector<int> coord)
 {
     // Grab the passed in coordiante and perform sanity check
     int x = coord[0];
     int y = coord[1];
 
-    if (x >= CA.dim1 || x < 0 || y >= CA.dim2 || y < 0 || nth_feature < 0) {
+    if (x >= CA.dim1 || x < 0 || y >= CA.dim2 || y < 0) {
         cout<<"Invalid coordinate or feature index!"<<endl;
         return -1;
     }
     // Get the neighbors of coordinate
-    vector<vector<int>> neighbors = get_neighborhood(CA, coord);
+    vector<vector<int> > neighbors = get_neighborhood(CA, coord);
 
     // Map for storing frequency
     map<int, int> frequencyMap;
-    for (const auto &coord: neighbors) {
-        frequencyMap[CA.grid[x][y][nth_feature]]++;
+    for (const auto &neighbor_coord : neighbors) {
+        int neighbor_x = neighbor_coord[0];
+        int neighbor_y = neighbor_coord[1];
+        frequencyMap[CA.grid[neighbor_x][neighbor_y].state_t0]++;
     }
     // Get the value with the maximum frequency
     int maxFrequencyValue = 0;
@@ -231,4 +234,25 @@ int majority_rule_update(CellularAutomata &CA, vector<int> coord, int nth_featur
     }
     // Return cell value the highest frequency value
     return maxFrequencyValue;
+}
+
+// Probability x of cell entering state x when initialized
+int CA_init_state(CellularAutomata &CA, double prob, int val)
+{
+    
+    srand(static_cast<unsigned int>(time(0)));
+    
+    // Walk over grid 
+    for (int x = 0; x < CA.dim1; x++)
+    for (int y = 0; y < CA.dim2; y++) 
+    {
+        // Generate a random number between 0 and 1
+        double randomValue = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+    
+        // Set the value based on probability
+        if (randomValue <= prob) {CA.grid[x][y].state_t0 = val;}
+        // Set a default state for when randomValue > prob
+        else { CA.grid[x][y].state_t0 = 0;}
+    }
+    return 0;
 }
