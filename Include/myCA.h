@@ -23,6 +23,7 @@ class CellularAutomata
 {
     public:
         vector<vector<Cell> > grid;    // 3D grid structure that stores double data type
+        std::map<string, int> states; // Map of the possible state values
         int neighbor_type;      // 1 -> Von Neumann neighborhood; 2 -> Moore neighborhood
         int bound_type;         // 3 -> Static; 4 -> Periodic Boundary
         int dim1;               // Number of rows for CA
