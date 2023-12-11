@@ -18,14 +18,14 @@ class Cell {
         //add copy constructor for neighborhood
         ~Cell(){}
         //Curtis 
-        int setFeature(string feature, double value){} // Method to add/change feature of the cell
-        double getFeature(string feature){} // Method to get feature value
-        int getState_t0(){} // Method to get current state
-        int setState_t0(int state){} // Methof to set current state
-        int getState_tx(){} // Method to get new state
-        int setState_tx(int state){} // Methof to set new state
-        vector<int> getPosition(){} // Method to get x and y positions
-        int cell_update(){} // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
+        int setFeature(string feature, double value); // Method to add/change feature of the cell
+        double getFeature(string feature) const; // Method to get feature value
+        int getState_t0() const; // Method to get current state
+        int setState_t0(int state); // Methof to set current state
+        int getState_tx() const; // Method to get new state
+        int setState_tx(int state); // Methof to set new state
+        vector<int> getPosition() const; // Method to get x and y positions
+        int cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
 
 };
 
@@ -39,11 +39,12 @@ public:
 struct Neighborhood
 {   
     public:
-    vector<vector<Cell> > subgrid;    // 3D grid structure that stores cell data type
-    int dim1;               // Number of rows for subgrid
-    int dim2;               // Number of columns for subgrid
-    Neighborhood(); //implement construction with the copied features, x and y in reference to the center coord
-    ~Neighborhood();
+    map<Cell, int> subgrid; // Store neighboring cells and their distances
+    int dim;               // Number of cells in the subgrid
+    // vector<vector<Cell> > subgrid;    // 3D grid structure that stores cell data type
+    // int dim2;               // Number of columns for subgrid
+    // Neighborhood(); //implement construction with the copied features, x and y in reference to the center coord
+    // ~Neighborhood();
 };
 
 class CellularAutomata
@@ -57,6 +58,10 @@ class CellularAutomata
         int dim1;               // Number of rows for CA
         int dim2;               // Number of columns for CA
         int message_radius;     // Message passing radius
+
+        Cell boundary_cell;     // Place holder cell that act as the boundary
+
+
     public:
         CellularAutomata();
         ~CellularAutomata();
@@ -132,9 +137,10 @@ class CellularAutomata
 #define VONNEUMANN  1
 #define MOORE       2
 #define STATIC      3
-#define PERIODIC    4
-#define MAJORITY    5
-#define PARITY      6
+#define FIXED       4
+#define PERIODIC    5
+#define MAJORITY    6
+#define PARITY      7
 
 
 // Rule for majority rule that returns update value

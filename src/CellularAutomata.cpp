@@ -1,5 +1,6 @@
 // This file is the source file for Cellular Automata
 #include "myCA.h"
+#include "myCA_edit.h"
 
 // Consturctor and Destructor for the cellular automata
 CellularAutomata::CellularAutomata(){}
@@ -167,40 +168,40 @@ int CA_setup_rule_wprob(CellularAutomata &CA, int rule_type, double prob)
 }
 
 // Retrieve all valid neighbor coordinates given a cell coordinate
-vector<vector<int> > get_neighborhood(CellularAutomata &CA, vector<int> coord)
-{
-    // Boudnary check already performed in update functions
-    int x = coord[0];
-    int y = coord[1];
+// vector<vector<int> > get_neighborhood(CellularAutomata &CA, vector<int> coord)
+// {
+//     // Boudnary check already performed in update functions
+//     int x = coord[0];
+//     int y = coord[1];
 
-    int radius = CA.message_radius;
-    vector<vector<int> > res; // Result vector for storing all valid neighbor coordinates
+//     int radius = CA.message_radius;
+//     vector<vector<int> > res; // Result vector for storing all valid neighbor coordinates
 
-    for (int dx = -radius; dx <= radius; ++dx) {
-        for (int dy = -radius; dy <= radius; ++dy) {
-            // Skip center cell
-            // Skip corner neighbors for Von Neumann neighborhood type
-            if ((dx == 0 && dy == 0) || (CA.neighbor_type == VONNEUMANN && abs(dx) + abs(dy) > radius)) {
-                continue;
-            }
-            // Get neighbor coordinate
-            int nx = x + dx;
-            int ny = y + dy;
+//     for (int dx = -radius; dx <= radius; ++dx) {
+//         for (int dy = -radius; dy <= radius; ++dy) {
+//             // Skip center cell
+//             // Skip corner neighbors for Von Neumann neighborhood type
+//             if ((dx == 0 && dy == 0) || (CA.neighbor_type == VONNEUMANN && abs(dx) + abs(dy) > radius)) {
+//                 continue;
+//             }
+//             // Get neighbor coordinate
+//             int nx = x + dx;
+//             int ny = y + dy;
 
-            // Adjust for periodic boundaries
-            if (CA.bound_type == PERIODIC) {
-                nx = (nx + CA.dim1) % CA.dim1;
-                ny = (ny + CA.dim2) % CA.dim2;
-            }
+//             // Adjust for periodic boundaries
+//             if (CA.bound_type == PERIODIC) {
+//                 nx = (nx + CA.dim1) % CA.dim1;
+//                 ny = (ny + CA.dim2) % CA.dim2;
+//             }
 
-            // Add valid coordinate to result vector
-            if (nx >= 0 && nx < CA.dim1 && ny >= 0 && ny < CA.dim2) {
-                res.push_back({nx, ny});
-            }
-        }
-    }
-    return res;
-}
+//             // Add valid coordinate to result vector
+//             if (nx >= 0 && nx < CA.dim1 && ny >= 0 && ny < CA.dim2) {
+//                 res.push_back({nx, ny});
+//             }
+//         }
+//     }
+//     return res;
+// }
 
 // Message passing update function for the majority rule
 int majority_rule(CellularAutomata &CA, vector<int> coord)
@@ -255,4 +256,54 @@ int CA_init_state(CellularAutomata &CA, double prob, int val)
         else { CA.grid[x][y].state_t0 = 0;}
     }
     return 0;
+}
+
+// Get neighborhood function
+Neighborhood CellularAutomata::get_neighborhood(vector<int> coord)
+{
+    // Boudnary check already performed in update functions
+    int x = coord[0];
+    int y = coord[1];
+
+
+    int radius = this->message_radius;
+    map<Cell, int> subgrid;
+    int count;
+
+    for (int dx = -radius; dx <= radius; ++dx) {
+        for (int dy = -radius; dy <= radius; ++dy) {
+            // Skip center cell
+            // Skip corner neighbors for Von Neumann neighborhood type
+            int current_radius = abs(dx) + abs(dy);
+            if ((dx == 0 && dy == 0) || (this->neighbor_type == VONNEUMANN && current_radius > radius)) {
+                continue;
+            }
+            // Get neighbor coordinate
+            int nx = x + dx;
+            int ny = y + dy;
+
+            // Adjust for periodic boundaries
+            if (this->bound_type == PERIODIC) {
+                nx = (nx + this->dim1) % this->dim1;
+                ny = (ny + this->dim2) % this->dim2;
+            }
+
+            // Index out of bounds situation for fixed neighborhood type
+            if ((nx < 0 || nx >= this->dim1 || ny < 0 || ny >= this->dim2) && this->neighbor_type == FIXED) {
+                subgrid[this->grid[x][y]] = current_radius;
+                count++;
+            }
+            // Add valid coordinate to result vector
+            if (nx >= 0 && nx < this->dim1 && ny >= 0 && ny < this->dim2) {
+                subgrid[this->grid[x][y]] = current_radius;
+                count++;
+            }
+        }
+    }
+    // Initialize neighborhood
+    Neighborhood neighbor;
+    neighbor.subgrid = subgrid;
+    neighbor.dim = count;
+
+    return neighbor;
 }
