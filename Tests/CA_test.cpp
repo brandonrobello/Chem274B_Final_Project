@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 using namespace std;
-#include "myCA.h"
+#include "myCA_edit.h"
 
 
 
@@ -14,18 +14,34 @@ using namespace std;
 
 int main()
 {
-    CellularAutomata test_CA_t0;
-    string outfile_path = "Test_CA_output.txt";
+    CellularAutomata test_CA_majority;
+    MajorityRule majorityrule;
+    string CAframe_outfile_path = "Test_CAframe_output.txt";
+    string CellState_outfile_path = "Test_frameCellState_output.txt";
 
-    CA_setup_dimension(test_CA_t0, 2, 9, 9, 1);
 
-    CA_setup_neighborhood(test_CA_t0, 1);
+    test_CA_majority.setup_dimension(2, 9, 9);
 
-    CA_setup_boundtype(test_CA_t0, 3, 1);
+    test_CA_majority.setup_neighborhood(MOORE);
 
-    CA_init_state(test_CA_t0, 0.50, 1);
+    test_CA_majority.set_boundtype(STATIC, 1);
 
-    CA_Engine(test_CA_t0, 10, outfile_path);
+    test_CA_majority.init_CA_state(0);
+
+    test_CA_majority.init_CA_stateWprob(2, 0.25);
+
+    for (int step = 0; step < 2; step++)
+    {
+        cout << "step " << step << " Frame:" << endl;
+        test_CA_majority.print();
+        test_CA_majority.record_CAframe(CAframe_outfile_path);
+        test_CA_majority.update(majorityrule);
+        test_CA_majority.swapState();
+        cout << "After update and swap, Frame:" << endl;
+                test_CA_majority.print();
+
+    }
+
 
 return 0;
 }

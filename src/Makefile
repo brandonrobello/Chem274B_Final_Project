@@ -24,15 +24,15 @@ LIB_DIR = ../Lib
 
 # linkable object files containing sorting algorithms
 # as of 10/17/2023 the list contains only quicksort.o
-CA_OBJS = CellularAutomata.o CA_Engine.o
+CA_OBJS = CellularAutomata.o Cell.o
 # sorting library containing sorting algorithms
 CA_LIB = libmyCA.a 
 
-CellularAutomata.o:  $(INC_DIR)/myCA.h
+CellularAutomata.o:  $(INC_DIR)/myCA_edit.h
 	$(CPP) $(CPPFLAGS) CellularAutomata.cpp -I$(INC_DIR)
 
-CA_Engine.o:  $(INC_DIR)/myCA.h
-	$(CPP) $(CPPFLAGS) CA_Engine.cpp -I$(INC_DIR)
+Cell.o:  $(INC_DIR)/myCA_edit.h
+	$(CPP) $(CPPFLAGS) Cell.cpp -I$(INC_DIR)
 
 # The following target creates a static library 
 libmyCA.a: $(CA_OBJS)

@@ -14,6 +14,8 @@ int Cell::setFeature(string feature, double value)
         return -1;
     }
     it -> second = value;
+
+    return 0;
 }
 
 // Cell feature getter
@@ -37,7 +39,7 @@ int Cell::getState_t0() const
 int Cell::setState_t0(int state)
 {
     this->state_t0 = state;
-    return 1;
+    return 0;
 }
 
 // Cell state tx getter
@@ -49,7 +51,7 @@ int Cell::getState_tx() const
 int Cell::setState_tx(int state)
 {
     this->state_tx = state;
-    return 1;
+    return 0;
 }
 
 // x and y position getter
@@ -62,4 +64,6 @@ vector<int> Cell::getPosition() const
 int Cell::cell_update()
 {
     swap(this->state_t0, this->state_tx);
+
+    return 0;
 }

@@ -29,7 +29,7 @@ BIN_DIR     = ../Bin
 # created by this Makefile.
 TEST_EXECUTABLES = CA_test
 
-CA_test: $(INC_DIR)/myCA.h
+CA_test: $(INC_DIR)/myCA_edit.h
 	$(CPP) $(CPPFLAGS) test CA_test.cpp \
 	-I$(INC_DIR) -L$(LIB_DIR) -lmyCA
 	mv test $(BIN_DIR)

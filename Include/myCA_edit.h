@@ -1,3 +1,7 @@
+
+
+#pragma once    // Ensures that this file is only included once
+                // during compilation
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -14,9 +18,9 @@ class Cell {
         int state_tx; // Updated state of the cell
         std::map<string, double> features; // Map to track what each feature and value
     public:
-        Cell(){}
+        Cell();
         //add copy constructor for neighborhood
-        ~Cell(){}
+        ~Cell();
         //Curtis 
         int setFeature(string feature, double value); // Method to add/change feature of the cell
         double getFeature(string feature) const; // Method to get feature value
@@ -26,16 +30,12 @@ class Cell {
         int setState_tx(int state); // Methof to set new state
         vector<int> getPosition() const; // Method to get x and y positions
         int cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
-
+        // Implemented to fulfill requirements for map in neighborhood
+        bool operator<(const Cell& other) const {
+        if (x != other.x) return x < other.x;
+        return y < other.y;
+        }
 };
-
-class Rule {
-public:
-    virtual int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) = 0;
-    virtual ~Rule() {}
-};
-
-//Curtis
 struct Neighborhood
 {   
     public:
@@ -46,6 +46,15 @@ struct Neighborhood
     // Neighborhood(); //implement construction with the copied features, x and y in reference to the center coord
     // ~Neighborhood();
 };
+
+class Rule {
+public:
+    virtual int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) = 0;
+    virtual ~Rule() {}
+};
+
+//Curtis
+
 
 class CellularAutomata
 {
@@ -77,7 +86,7 @@ class CellularAutomata
         // Set possible states
         int set_states(std::map<string, int> states);
         // Return list of possible states
-        std::map<string, int> list_states();
+        std::map<string, int> list_states() const;
 
         // Could use overloading or defualt variables for less individual methods below:
         // Cell features setup for the cellular automaton
@@ -97,7 +106,7 @@ class CellularAutomata
         int init_CA_stateWprob(int stat_t0, double probability);
 
         // Optional (Brandon) 
-        int init_Cell_state(int stat_t0);
+        int init_Cell_state(int stat_t0, vector<vector<int> > coords);
         int init_Cell_stateWprob(int stat_t0, double probability,  vector<vector<int> > coords);
         
         
@@ -112,26 +121,16 @@ class CellularAutomata
         //Brandon
         //Alternatively could combine the three functions below into one method for one loop
         // Records the current frame of the CA
-        int record_CAframe(string filepath);
+        int record_CAframe(string filepath) const;
         // Records the current cell states of the CA
-        int record_cellState(string filepath);
+        //int record_CellState(string filepath) const;
         
         // Method to swap staes from tx to after recording for each new update
         int swapState();
         // Function that drive the timestep updates use rule function
-        int update(Rule& rule)
-        {
-            for (int i = 0; i < dim1; i++) 
-            {
-                for (int j = 0; j < dim2; j++) 
-                {
-                    Neighborhood neighborhood = get_neighborhood({i, j});
-                    int newState = rule.apply(neighborhood, states); // Apply the passed-in rule function here
-                    grid[i][j].setState_tx(newState); // Directly update the state_tx of the cell
-                }
-            }
-            return 0; // Return success or error code
-        }
+        int update(Rule& rule);
+        // Print the CA to console for debugging
+        void print() const;
 };
 
 #define VONNEUMANN  1
@@ -147,10 +146,31 @@ class CellularAutomata
 class MajorityRule : public Rule {
 public:
     int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
-        // Implement majority rule logic
+        // Map for storing frequency of states
+        std::map<int, int> frequencyMap;
+
+        // Iterate through each cell in the neighborhood map
+        for (const auto &cellEntry : neighborhood.subgrid) {
+            const Cell &cell = cellEntry.first;
+            frequencyMap[cell.getState_t0()]++;
+        }
+
+        // Determine the state with the maximum frequency
+        int maxFrequencyValue = 0;
+        int maxFrequency = 0;
+        for (const auto &entry : frequencyMap) {
+            if (entry.second > maxFrequency) {
+                maxFrequency = entry.second;
+                maxFrequencyValue = entry.first;
+            }
+        }
+
+        return maxFrequencyValue;
     }
 };
 
+
+/*
 // Rule for straight conditional
 class StraightConditionalRule : public Rule {
 public:
@@ -178,3 +198,4 @@ class ConditionalTransitionRule : public Rule {};
 
 // Rule for parity rule
 class ParityRule : public Rule {};
+*/
