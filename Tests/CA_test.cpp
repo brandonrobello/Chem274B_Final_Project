@@ -30,7 +30,7 @@ int main()
 
     test_CA_majority.init_CA_stateWprob(2, 0.25);
 
-    for (int step = 0; step < 2; step++)
+    for (int step = 0; step < 20; step++)
     {
         cout << "step " << step << " Frame:" << endl;
         test_CA_majority.print();
