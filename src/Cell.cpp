@@ -67,3 +67,25 @@ int Cell::cell_update()
 
     return 0;
 }
+
+
+void Cell::set_x(int x) 
+{
+    this->x = x;
+}
+
+void Cell::set_y(int y) 
+{
+    this->y = y;
+}
+
+int Cell::get_x() const {return this->x;}
+
+int Cell::get_y() const {return this->y;}
+
+
+bool Cell::operator<(const Cell& other) const 
+{
+    if (x != other.x) return x < other.x;
+    return y < other.y;
+}

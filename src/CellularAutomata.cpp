@@ -149,6 +149,8 @@ int CellularAutomata::init_CA_state(int stat_t0)
     for (int i = 0; i < dim1; ++i) {
         for (int j = 0; j < dim2; ++j) {
             grid[i][j].setState_t0(stat_t0);
+            grid[i][j].set_x(i);
+            grid[i][j].set_y(j);
         }
     }
     cout << "Initialized all cells to state " << stat_t0 << "." << endl;
@@ -247,12 +249,13 @@ Neighborhood CellularAutomata::get_neighborhood(vector<int> coord)
 
             // Index out of bounds situation for fixed neighborhood type
             if ((nx < 0 || nx >= this->dim1 || ny < 0 || ny >= this->dim2) && this->neighbor_type == FIXED) {
-                subgrid[this->grid[x][y]] = current_radius;
+                subgrid[this->grid[nx][ny]] = current_radius;
                 count++;
             }
             // Add valid coordinate to result vector
             if (nx >= 0 && nx < this->dim1 && ny >= 0 && ny < this->dim2) {
-                subgrid[this->grid[x][y]] = current_radius;
+                subgrid[this->grid[nx][ny]] = current_radius;
+                // cout<<"The neighbor at position (" << nx << ","<<ny<<")"<<endl;
                 count++;
             }
         }
@@ -344,6 +347,7 @@ int CellularAutomata::update(Rule& rule) {
         for (int j = 0; j < dim2; j++) {
             Neighborhood neighborhood = get_neighborhood({i, j});
             int newState = rule.apply(neighborhood, states);
+            // cout<<"The state of cell ("<<i<<","<<j<<") was updated from "<<grid[i][j].getState_t0()<<" to "<<newState<<endl;
             grid[i][j].setState_tx(newState);
         }
     }

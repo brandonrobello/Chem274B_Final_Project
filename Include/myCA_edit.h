@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <map>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -31,10 +32,11 @@ class Cell {
         vector<int> getPosition() const; // Method to get x and y positions
         int cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
         // Implemented to fulfill requirements for map in neighborhood
-        bool operator<(const Cell& other) const {
-        if (x != other.x) return x < other.x;
-        return y < other.y;
-        }
+        bool operator<(const Cell& other) const;
+        void set_x(int x);
+        void set_y(int y);
+        int get_x() const;
+        int get_y() const;
 };
 struct Neighborhood
 {   
@@ -153,6 +155,7 @@ public:
         for (const auto &cellEntry : neighborhood.subgrid) {
             const Cell &cell = cellEntry.first;
             frequencyMap[cell.getState_t0()]++;
+            // cout<<"Increments frequency of state "<<cell.getState_t0()<<" while searching position ("<<cell.get_x()<<","<<cell.get_y()<<")"<<endl;
         }
 
         // Determine the state with the maximum frequency
