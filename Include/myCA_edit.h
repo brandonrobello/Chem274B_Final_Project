@@ -29,7 +29,7 @@ class Cell {
 
         vector<int> getPosition() const; // Method to get x and y positions
 
-        int cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
+        void cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
         // Implemented to fulfill requirements for map in neighborhood
         bool operator<(const Cell& other) const;
         void set_x(int x);

@@ -35,11 +35,10 @@ vector<int> Cell::getPosition() const
 }
 
 // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
-int Cell::cell_update()
+void Cell::cell_update()
 {
-    swap(this->state_t0, this->state_tx);
-
-    return 0;
+    this->state_t0 = this->state_tx;
+    void;
 }
 
 
