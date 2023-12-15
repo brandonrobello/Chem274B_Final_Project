@@ -44,7 +44,6 @@ public:
                 infection_period_tracker.erase(identifier); // Remove tracker from list after recovery
             }
         }
-
         return centerCell.getState_t0(); // Return the current state if no change
     }
 };
@@ -100,7 +99,7 @@ class InfectionRule: public Rule {
             int current_state = neighborhood.center_cell.getState_t0();
 
             // Skip for empty and infected cells
-            if (current_state == EMPTY || current_state == INFECTED) {
+            if (current_state == EMPTY || current_state == INFECTED || current_state == RECOVERED) {
                 return current_state;
             }
 
@@ -138,7 +137,7 @@ class InfectionRule: public Rule {
                     return current_state;
                 }
             }
-            return 0;
+            return current_state;
         }
 };
 
