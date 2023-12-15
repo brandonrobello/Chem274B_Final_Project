@@ -1,24 +1,67 @@
 #pragma once
 
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
-#include <map>
-#include <utility>
-#include <vector>
-#include <fstream>
-# include "myCA_edit.h"
+#include "myCA_edit.h"
 
-using namespace std;
+#define EMPTY 0
+#define INF_NOMASK 1
+#define INF_MASKED 2
+#define HEALTHY_NOMASK 3
+#define HEALTHY_MASKED 4
 
-class SIRRule : public Rule {
-private:
-    double vaccination_rate;
-    double mask_wearing_rate;
+class CovidSusceptibilityRule: public Rule {
 
-public:
-    SIRRule(double vacc_rate, double mask_rate);
-    int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list, int boundary_cell) override;
+    private:
+        double n_;
+        double k_;
+        double mask_reductionratio_;
+        double vac_reductionratio_;
+        double probability_;
+
+    public:
+        CovidSusceptibilityRule(double n, double k, double mask_reduction_ratio, double vac_reductionratio, double probability)
+            : n_(n), k_(k), mask_reductionratio_(mask_reduction_ratio),
+            vac_reductionratio_(vac_reductionratio), probability_(probability) {
+        }
+        // This function will aggregate information from the neighboring cells, and output a "suscetibility" value
+        int apply(Neighborhood &neighborhood) override{
+
+            double susceptibility_value = 0; // susceptibility_value that will be returned
+            int count_1;
+            int count_2;
+            int old_state = neighborhood.center_cell.getState_t0();
+
+            if (old_state == EMPTY || old_state == INF_NOMASK || old_state == INF_MASKED) {
+                // If the cell is already infected or empty, skip the update
+                return old_state;
+            }
+            // Map for storing frequency of states
+            for (const auto &cellEntry : neighborhood.subgrid) {
+
+                const Cell &cell = cellEntry.first; // Gets the cell
+
+                int cell_state = cell.getState_t0();// Gets the state of the cell
+                // int radius = cellEntry.second;      // Gets the distance of this neighbor
+                if (cell_state == INF_NOMASK) {
+                    count_1 ++;
+                }
+                if (cell_state == INF_MASKED) {
+                    count_2 ++;
+                }
+            }
+
+            susceptibility_value += count_1*0.3 + count_2*0.1;
+
+            // Use random number generator to decides update
+            srand(static_cast<unsigned int>(time(0)));
+            double randomValue = static_cast<double>(rand()) / RAND_MAX;
+
+            if (randomValue <= susceptibility_value) {
+                // Set the person to infected
+                if (old_state == HEALTHY_MASKED) {
+                    return INF_MASKED;
+                }
+                return INF_NOMASK;
+            }
+            return old_state;
+        }
 };
-
-
