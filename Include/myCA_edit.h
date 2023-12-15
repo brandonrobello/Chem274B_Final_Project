@@ -95,7 +95,8 @@ class CellularAutomata
         Neighborhood get_neighborhood(vector<int> coord);
 
         // Query the current cell states of the CA
-        int query_cellState(string filepath);
+        std::map<int, int> query_cellState();
+        int record_cellState(string filepath);
 
         //Alternatively could combine the three functions below into one method for one loop
         // Records the current frame of the CA
@@ -189,7 +190,7 @@ class NeighborConditionalRule : public Rule {
         int new_state; // New state to transition to
 
     public:
-        // Constructor to include a trigger state, neighbor_target_state, and new_state
+        //+ Constructor to include a trigger state, neighbor_target_state, and new_state
         NeighborConditionalRule(int trigger_state, int neighbor_target_state, int new_state)
             : trigger_state(trigger_state), neighbor_target_state(neighbor_target_state), new_state(new_state) {}
 

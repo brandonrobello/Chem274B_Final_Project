@@ -22,6 +22,6 @@ test:
 	cd $(TEST_DIR); make all; cd ..
 
 run:
-	cd $(BIN_DIR); ./test; cd ..
+	cd $(BIN_DIR); ./COVID_test; cd ..
 
 all: $(TEST_EXECUTABLES)

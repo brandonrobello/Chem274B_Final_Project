@@ -96,7 +96,7 @@ if (run_CA_selection == 3){
     string CAframe_outfile_path = "Test_CAframe_output_3.txt";
 
     
-    // Define the transition states f
+    // Define the transition states
     vector<int> transitionStates1 = {0, 3}; // Example sequenc
     StraightConditionalRule straightRule1(transitionStates1);
      vector<int> transitionStates2 = {100, 1}; // Example sequenc

@@ -296,3 +296,39 @@ int CellularAutomata::update(vector<Rule*>& rules) {
     }
     return 0;
 }
+
+// Query the current cell states of the CA
+std::map<int, int> CellularAutomata::query_cellState()
+{
+        // Map for storing frequency of states
+        std::map<int, int> frequencyMap;    
+        for (const auto &cellvector : grid){
+        for (const auto &cell : cellvector)
+        {
+            frequencyMap[cell.getState_t0()]++;
+        }
+        }
+        return frequencyMap;
+}
+// Query the current cell states of the CA
+int CellularAutomata::record_cellState(string filepath){
+    ofstream outfile(filepath, ios::app); // Opens file in append mode
+
+    if (!outfile.is_open()) {
+        perror(("Error opening file " + filepath).c_str());
+        return -1;
+    }
+
+    if (outfile.tellp() == 0) {
+        outfile << "State,count" << endl; // Write dimensions if file is empty
+    }
+
+    std::map<int, int> frequencyMap = query_cellState();
+
+    for (auto& state : frequencyMap) {
+        outfile << state.first << "," << state.second << "\t";
+    }
+    outfile << endl; // New line for next frame
+    outfile.close();
+    return 0;
+}
