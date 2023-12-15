@@ -16,7 +16,7 @@ class Cell {
         int x; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
         int y; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
         int state_t0; // Intitial state of the cell 
-        int state_tx; // Updated state of the cell
+        int state_tx = 0; // Updated state of the cell
 
     public:
         Cell();

@@ -100,7 +100,7 @@ class InfectionRule: public Rule {
             int current_state = neighborhood.center_cell.getState_t0();
 
             // Skip for empty and infected cells
-            if (current_state == EMPTY || current_state == INFECTED) {
+            if (current_state == EMPTY || current_state == INFECTED || current_state == RECOVERED) {
                 return current_state;
             }
 
@@ -138,7 +138,6 @@ class InfectionRule: public Rule {
                     return current_state;
                 }
             }
-            return 0;
         }
 };
 
