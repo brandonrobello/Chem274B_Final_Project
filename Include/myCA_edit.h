@@ -17,19 +17,18 @@ class Cell {
         int y; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
         int state_t0; // Intitial state of the cell 
         int state_tx; // Updated state of the cell
-        std::map<string, double> features; // Map to track what each feature and value
+
     public:
         Cell();
         //add copy constructor for neighborhood
         ~Cell();
-        //Curtis 
-        int setFeature(string feature, double value); // Method to add/change feature of the cell
-        double getFeature(string feature) const; // Method to get feature value
         int getState_t0() const; // Method to get current state
         int setState_t0(int state); // Methof to set current state
         int getState_tx() const; // Method to get new state
         int setState_tx(int state); // Methof to set new state
+
         vector<int> getPosition() const; // Method to get x and y positions
+
         int cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
         // Implemented to fulfill requirements for map in neighborhood
         bool operator<(const Cell& other) const;
@@ -45,15 +44,11 @@ struct Neighborhood
     map<Cell, int> subgrid; // Store neighboring cells and their distances
     int dim;               // Number of cells in the subgrid
     Cell center_cell;       // Copy of the center cell of the neighborhood 
-    // vector<vector<Cell> > subgrid;    // 3D grid structure that stores cell data type
-    // int dim2;               // Number of columns for subgrid
-    // Neighborhood(); //implement construction with the copied features, x and y in reference to the center coord
-    // ~Neighborhood();
 };
 
 class Rule {
 public:
-    virtual int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) = 0;
+    virtual int apply(Neighborhood &neighborhood) = 0;
     virtual ~Rule() {}
 };
 
@@ -63,9 +58,8 @@ public:
 class CellularAutomata
 {
     private:
-        vector<vector<Cell> > grid;    // 3D grid structure that stores cell data type
+        vector<vector<Cell>> grid;    // 3D grid structure that stores cell data type
         std::map<string, int> states; // Map of the possible state values
-        vector<string> features; // List of all cell features add for reference and return to user
         int neighbor_type;      // 1 -> Von Neumann neighborhood; 2 -> Moore neighborhood
         int bound_type;         // 3 -> Static; 4 -> Periodic Boundary
         int dim1;               // Number of rows for CA
@@ -78,7 +72,6 @@ class CellularAutomata
     public:
         CellularAutomata();
         ~CellularAutomata();
-        //add copy constructor
         // Dimension and initial setup for the cellular automaton
         int setup_dimension(int ndims, int dim1, int dim2);
         // Neighborhood type set up for the cellular automaton
@@ -86,43 +79,24 @@ class CellularAutomata
         // Boundary type setup for the cellular automaton
         int set_boundtype(int bound_type, int radius);
         
-        //Brandon 
         // Set possible states
         int set_states(std::map<string, int> states);
         // Return list of possible states
         std::map<string, int> list_states() const;
 
-        // Could use overloading or defualt variables for less individual methods below:
-        // Cell features setup for the cellular automaton
-        int set_CA_features(string feature, double feat_val); // For setup a global feature in the CA, all Cells have this feature and value
-        int set_CA_featuresWprob(string feature, double feat_val, double probability); // For setup a global feature in the CA using a probability, all Cells have this feature and value if prob is true
-        
-        // Optional (Brandon)
-        int set_CA_featuresWconditionT(string feature, double feat_val, string feat_cond, double val_condition); // For setup a global feature in the CA if feature condiditon is true, all Cells have this feature and value if prob is true
-        int set_CA_featuresWconditionF(string feature, double feat_val, string feat_cond, double val_condition); // For setup a global feature in the CA if feature condiditon is false, all Cells have this feature and value if prob is true
-        int set_Cell_features(string feature, double feat_val, vector<vector<int> > coords); // For setup a feature in the CA for Coords set, all Cells have this feature and value
-        int set_Cell_featuresWprob(string feature, double feat_val, double probability, vector<vector<int> > coords); // For setup a feature in the CA using a probability for Coords set, all Cells have this feature and value if prob is true
-        int set_Cell_featuresWconditionT(string feature, double feat_val, string feat_cond, double val_condition, vector<vector<int> > coords); // For setup a feature in the CA if feature condiditon is true for Coords set, all Cells have this feature and value if prob is true
-        int set_Cell_featuresWconditionF(string feature, double feat_val, string feat_cond, double val_condition, vector<vector<int> > coords); // For setup a feature in the CA if feature condiditon is false for Coords set, all Cells have this feature and value if prob is true
-        
         // Intializing Cells State_T0
         int init_CA_state(int stat_t0);
         int init_CA_stateWprob(int stat_t0, double probability);
 
-        // Optional (Brandon) 
         int init_Cell_state(int stat_t0, vector<vector<int> > coords);
         int init_Cell_stateWprob(int stat_t0, double probability,  vector<vector<int> > coords);
         
-        
-        // Not implemented yet Curtis
         // Retrieve all valid neighbor Cells given cell coordinate
         Neighborhood get_neighborhood(vector<int> coord);
 
-        // Radhika
         // Query the current cell states of the CA
         int query_cellState(string filepath);
 
-        //Brandon
         //Alternatively could combine the three functions below into one method for one loop
         // Records the current frame of the CA
         int record_CAframe(string filepath) const;
@@ -149,7 +123,7 @@ class CellularAutomata
 // Rule for majority rule that returns update value
 class MajorityRule : public Rule {
 public:
-    int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+    int apply(Neighborhood &neighborhood) override {
         // Map for storing frequency of states
         std::map<int, int> frequencyMap;
 
@@ -184,7 +158,7 @@ class StraightConditionalRule : public Rule {
         StraightConditionalRule(const vector<int>& transition_state_list) 
             : transition_states(transition_state_list) {}
 
-        int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+        int apply(Neighborhood &neighborhood) override {
             const Cell& centerCell = neighborhood.center_cell; // Use the center cell
             int currentState = centerCell.getState_t0();
 
@@ -219,7 +193,7 @@ class NeighborConditionalRule : public Rule {
         NeighborConditionalRule(int trigger_state, int neighbor_target_state, int new_state)
             : trigger_state(trigger_state), neighbor_target_state(neighbor_target_state), new_state(new_state) {}
 
-        int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+        int apply(Neighborhood &neighborhood) override {
             const Cell& centerCell = neighborhood.center_cell;
             int currentState = centerCell.getState_t0();
 
@@ -262,7 +236,7 @@ public:
           distanceWeights(distanceWeights) {}
 
     // Calculates the activation and inhibition effects on a cell based on the states of its neighbors.
-    int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+    int apply(Neighborhood &neighborhood) override {
         double activeWeightedSum = 0;
         double inhibitoryWeightedSum = 0;
 
@@ -312,7 +286,7 @@ public:
     ParityRule(int targetState, int newStateEven, int newStateOdd)
         : targetState(targetState), newStateEven(newStateEven), newStateOdd(newStateOdd) {}
 
-    int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+    int apply(Neighborhood &neighborhood) override {
         // Count neighbors in the target state
         int count = 0;
         for (const auto &cellEntry : neighborhood.subgrid) {
