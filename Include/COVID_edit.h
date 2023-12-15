@@ -44,7 +44,6 @@ public:
                 infection_period_tracker.erase(identifier); // Remove tracker from list after recovery
             }
         }
-
         return centerCell.getState_t0(); // Return the current state if no change
     }
 };
@@ -138,6 +137,7 @@ class InfectionRule: public Rule {
                     return current_state;
                 }
             }
+            return current_state;
         }
 };
 
