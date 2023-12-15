@@ -287,13 +287,14 @@ int CellularAutomata::update(vector<Rule*>& rules) {
     for (Rule* rule : rules) {
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim2; j++) {
-                Neighborhood neighborhood = get_neighborhood({i, j});
-                int newState = rule->apply(neighborhood);
-                grid[i][j].setState_tx(newState);
+            
+            Neighborhood neighborhood = get_neighborhood({i, j});
+            int newState = rule->apply(neighborhood);
+            grid[i][j].setState_tx(newState);
             }
-        }
-        swapState();
+        }  
     }
+    swapState();
     return 0;
 }
 
