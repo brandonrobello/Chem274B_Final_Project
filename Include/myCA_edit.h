@@ -48,7 +48,7 @@ struct Neighborhood
 
 class Rule {
 public:
-    virtual int apply(Neighborhood &neighborhood) = 0;
+    virtual void apply(Neighborhood &neighborhood);
     virtual ~Rule() {}
 };
 
