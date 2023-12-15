@@ -38,11 +38,13 @@ class Cell {
         int get_x() const;
         int get_y() const;
 };
+
 struct Neighborhood
 {   
     public:
     map<Cell, int> subgrid; // Store neighboring cells and their distances
     int dim;               // Number of cells in the subgrid
+    Cell center_cell;       // Copy of the center cell of the neighborhood 
     // vector<vector<Cell> > subgrid;    // 3D grid structure that stores cell data type
     // int dim2;               // Number of columns for subgrid
     // Neighborhood(); //implement construction with the copied features, x and y in reference to the center coord
@@ -129,8 +131,8 @@ class CellularAutomata
         
         // Method to swap staes from tx to after recording for each new update
         int swapState();
-        // Function that drive the timestep updates use rule function
-        int update(Rule& rule);
+        // Function that drive the timestep updates using a vector of rules
+        int update(vector<Rule*>& rules);       
         // Print the CA to console for debugging
         void print() const;
 };
@@ -172,33 +174,166 @@ public:
     }
 };
 
-
-/*
-// Rule for straight conditional
+// Rule for straight conditional transition
 class StraightConditionalRule : public Rule {
-public:
-    int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
-        // Implement straight conditional rule logic
-    }
+    private:
+        vector<int> transition_states; // ordered list of states
+
+    public:
+        // Constructor to include a transistion state list
+        StraightConditionalRule(const vector<int>& transition_state_list) 
+            : transition_states(transition_state_list) {}
+
+        int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+            const Cell& centerCell = neighborhood.center_cell; // Use the center cell
+            int currentState = centerCell.getState_t0();
+
+            // Iterate through the transition states to find the next state
+            for (size_t i = 0; i < transition_states.size(); ++i) {
+                if (transition_states[i] == currentState) {
+                    // If current state is found, return the next state in the vector
+                    return (i < transition_states.size() - 1) ? transition_states[i + 1] : transition_states[0];
+                }
+            }
+
+            // Default behavior if state not found in transition_states
+            return currentState; 
+        }
+
+        // Function to set the straight conditional transition list
+        void changeTransitionStateList(const vector<int>& transition_state_list){
+            this->transition_states = transition_state_list;
+        }
+};
+
+
+// Rule for conditional transition based on a neighbor's state
+class NeighborConditionalRule : public Rule {
+    private:
+        int trigger_state; // State of the cell that triggers the change
+        int neighbor_target_state; // Target state of the neighbor to cause the change
+        int new_state; // New state to transition to
+
+    public:
+        // Constructor to include a trigger state, neighbor_target_state, and new_state
+        NeighborConditionalRule(int trigger_state, int neighbor_target_state, int new_state)
+            : trigger_state(trigger_state), neighbor_target_state(neighbor_target_state), new_state(new_state) {}
+
+        int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+            const Cell& centerCell = neighborhood.center_cell;
+            int currentState = centerCell.getState_t0();
+
+            // Check if the center cell is in the trigger state
+            if (currentState == trigger_state) {
+                // Check the states of neighboring cells
+                for (const auto& neighborEntry : neighborhood.subgrid) {
+                    const Cell& neighborCell = neighborEntry.first;
+                    int neighborState = neighborCell.getState_t0();
+
+                    // If a neighbor is in the target state, change the state of the center cell
+                    if (neighborState == neighbor_target_state) {
+                        return new_state;
+                    }
+                }
+            }
+
+            // If no change is required, return the current state
+            return currentState;
+        }
 };
 
 // Rule for Activation-Inhibition conditional
 class ActivationInhibitionRule : public Rule {
 private:
-    std::map<string, int> long_short_weights;
+    double activationThreshold;  // Threshold for a cell to become active
+    double inhibitionThreshold;  // Threshold for a cell to become inactive
+    int activeState;             // State that represents an active cell
+    int inactiveState;           // State that represents an inactive cell
+    int inhibitoryState;         // State that contributes to the inhibition of a cell
+    std::map<int, double> distanceWeights; // Weights associated with neighbor distances
 
 public:
-    ActivationInhibitionRule(const std::map<string, int>& weights) : long_short_weights(weights) {}
+    // Constructor: Initializes the thresholds, states, and distance weights.
+    ActivationInhibitionRule(double activationThreshold, double inhibitionThreshold,
+                             int activeState, int inactiveState, int inhibitoryState,
+                             std::map<int, double> distanceWeights)
+        : activationThreshold(activationThreshold), inhibitionThreshold(inhibitionThreshold),
+          activeState(activeState), inactiveState(inactiveState), inhibitoryState(inhibitoryState),
+          distanceWeights(distanceWeights) {}
 
+    // Calculates the activation and inhibition effects on a cell based on the states of its neighbors.
     int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
-        // Implement activation-inhibition rule logic
-        // You can use long_short_weights here
+        double activeWeightedSum = 0;
+        double inhibitoryWeightedSum = 0;
+
+        // Iterate over the neighborhood, calculating weighted sums for activation and inhibition.
+        for (const auto &neighbor : neighborhood.subgrid) {
+            const Cell &cell = neighbor.first;
+            int distance = neighbor.second;
+
+            double weight = distanceWeights.count(distance) > 0 ? distanceWeights[distance] : 1.0; // Use default weight if not specified.
+
+            // Increase weighted sums based on neighbor states and distance weights.
+            if (cell.getState_t0() == activeState) {
+                activeWeightedSum += weight;
+            } else if (cell.getState_t0() == inhibitoryState) {
+                inhibitoryWeightedSum += weight;
+            }
+        }
+
+        // Determine the cell's next state based on the activation/inhibition thresholds.
+        if (activeWeightedSum > activationThreshold && inhibitoryWeightedSum < inhibitionThreshold) {
+            return activeState;  // Cell becomes active.
+        } else if (inhibitoryWeightedSum > inhibitionThreshold) {
+            return inactiveState;  // Cell becomes inactive.
+        }
+
+        // If neither condition is met, return the current state.
+        return neighborhood.center_cell.getState_t0();
+    }
+
+    // setDistanceWeights: Updates the distanceWeights map to change influence dynamics.
+    void setDistanceWeights(const std::map<int, double>& newWeights) {
+        distanceWeights = newWeights;
     }
 };
 
-// Rule for conditional transition rule
-class ConditionalTransitionRule : public Rule {};
 
-// Rule for parity rule
-class ParityRule : public Rule {};
-*/
+
+// Rule for parity transition
+class ParityRule : public Rule {
+private:
+    int targetState; // The state to check for in neighbors
+    int newStateEven; // New state if the count is even
+    int newStateOdd; // New state if the count is odd
+
+public:
+    // Constructor
+    ParityRule(int targetState, int newStateEven, int newStateOdd)
+        : targetState(targetState), newStateEven(newStateEven), newStateOdd(newStateOdd) {}
+
+    int apply(Neighborhood &neighborhood, const std::map<string, int>& states_list) override {
+        // Count neighbors in the target state
+        int count = 0;
+        for (const auto &cellEntry : neighborhood.subgrid) {
+            if (cellEntry.first.getState_t0() == targetState) {
+                count++;
+            }
+        }
+
+        // Calculate parity (0 for even, 1 for odd)
+        int parity = count % 2;
+
+        // Return the new state based on the parity
+        return parity == 0 ? newStateEven : newStateOdd;
+    }
+
+    // Setters and getters
+    void setTargetState(int state) {
+        this->targetState = state;
+    }
+
+    int getTargetState() const {
+        return this->targetState;
+    }
+};

@@ -8,7 +8,7 @@
 CPP         = g++      
 
 # compiler flags -O3 optimized version -c create a library object
-CPPFLAGS    = -std=c++20 -g -O0 -o
+CPPFLAGS    = -std=c++20 -O0 -o
 
 # The directory where Week 9's main library include files are stored.
 INC_DIR = ../Include
