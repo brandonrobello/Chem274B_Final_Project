@@ -10,18 +10,7 @@
 
 class CovidSusceptibilityRule: public Rule {
 
-    private:
-        double n_;
-        double k_;
-        double mask_reductionratio_;
-        double vac_reductionratio_;
-        double probability_;
-
     public:
-        CovidSusceptibilityRule(double n, double k, double mask_reduction_ratio, double vac_reductionratio, double probability)
-            : n_(n), k_(k), mask_reductionratio_(mask_reduction_ratio),
-            vac_reductionratio_(vac_reductionratio), probability_(probability) {
-        }
         // This function will aggregate information from the neighboring cells, and output a "suscetibility" value
         int apply(Neighborhood &neighborhood) override{
 
