@@ -4,32 +4,6 @@
 Cell::Cell() {}
 Cell::~Cell() {}
 
-// Cell feature setter
-int Cell::setFeature(string feature, double value)
-{
-    auto it = features.find(feature);
-    // If feature exists
-    if (it == features.end()) {
-        cout<<"Feature not found!"<<endl;
-        return -1;
-    }
-    it -> second = value;
-
-    return 0;
-}
-
-// Cell feature getter
-double Cell::getFeature(string feature) const
-{
-    auto it = features.find(feature);
-    // If feature exists
-    if (it == features.end()) {
-        cout<<"Feature not found!"<<endl;
-        return -1;
-    }
-    return it -> second;
-}
-
 // Cell state t0 getter
 int Cell::getState_t0() const
 {
