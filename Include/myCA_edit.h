@@ -11,12 +11,14 @@
 
 using namespace std;
 
+#define SENTINEL        -100
+
 class Cell {
     private:
         int x; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
         int y; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
         int state_t0; // Intitial state of the cell 
-        int state_tx = 0; // Updated state of the cell
+        int state_tx = SENTINEL; // Updated state of the cell
 
     public:
         Cell();
@@ -43,12 +45,12 @@ struct Neighborhood
     public:
     map<Cell, int> subgrid; // Store neighboring cells and their distances
     int dim;               // Number of cells in the subgrid
-    Cell center_cell;       // Copy of the center cell of the neighborhood 
+    Cell* center_cell;       // Copy of the center cell of the neighborhood 
 };
 
 class Rule {
 public:
-    virtual void apply(Neighborhood &neighborhood);
+    virtual void apply(Neighborhood &neighborhood) = 0;
     virtual ~Rule() {}
 };
 
@@ -120,7 +122,7 @@ class CellularAutomata
 #define MAJORITY    6
 #define PARITY      7
 
-
+/*
 // Rule for majority rule that returns update value
 class MajorityRule : public Rule {
 public:
@@ -312,3 +314,4 @@ public:
         return this->targetState;
     }
 };
+*/

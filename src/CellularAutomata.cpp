@@ -231,7 +231,7 @@ Neighborhood CellularAutomata::get_neighborhood(vector<int> coord)
     Neighborhood neighbor;
     neighbor.subgrid = subgrid;
     neighbor.dim = count;
-    neighbor.center_cell = this->grid[x][y];
+    neighbor.center_cell = &grid[x][y];
 
     return neighbor;
 }
@@ -289,8 +289,8 @@ int CellularAutomata::update(vector<Rule*>& rules) {
             for (int j = 0; j < dim2; j++) {
             
             Neighborhood neighborhood = get_neighborhood({i, j});
-            int newState = rule->apply(neighborhood);
-            grid[i][j].setState_tx(newState);
+            rule->apply(neighborhood);
+            //grid[i][j].setState_tx(newState);
             }
         }  
     }
