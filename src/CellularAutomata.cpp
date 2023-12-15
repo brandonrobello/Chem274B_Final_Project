@@ -171,6 +171,9 @@ int CellularAutomata::init_CA_stateWprob(int stat_t0, double probability)
             if (randomValue <= probability) {
                 grid[i][j].setState_t0(stat_t0);
             }
+            else{
+                grid[i][j].setState_t0(grid[i][j].getState_t0());
+            }
         }
     }
     cout << "Initialized cell states to " << stat_t0 << " based on probability " << probability << "." << endl;
@@ -264,6 +267,7 @@ Neighborhood CellularAutomata::get_neighborhood(vector<int> coord)
     Neighborhood neighbor;
     neighbor.subgrid = subgrid;
     neighbor.dim = count;
+    neighbor.center_cell = this->grid[x][y];
 
     return neighbor;
 }
@@ -341,6 +345,28 @@ int CellularAutomata::swapState() {
     return 0; // Return 0 to indicate successful execution
 }
 
+// Function that drives the timestep updates using rule function
+int CellularAutomata::update(vector<Rule*>& rules) {
+    for (Rule* rule : rules) {
+        for (int i = 0; i < dim1; i++) {
+            for (int j = 0; j < dim2; j++) {
+                Neighborhood neighborhood = get_neighborhood({i, j});
+                int newState = rule->apply(neighborhood, states);
+                grid[i][j].setState_tx(newState);
+            }
+        }
+        swapState();
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+/*
 // Function that drive the timestep updates use rule function
 int CellularAutomata::update(Rule& rule) {
     for (int i = 0; i < dim1; i++) {
@@ -353,7 +379,7 @@ int CellularAutomata::update(Rule& rule) {
     }
     return 0;
 }
-
+*/
 
 
 
