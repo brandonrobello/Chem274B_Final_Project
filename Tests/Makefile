@@ -27,11 +27,16 @@ BIN_DIR     = ../Bin
 
 # The next line contains a list of executable object files 
 # created by this Makefile.
-TEST_EXECUTABLES = CA_test
+TEST_EXECUTABLES = COVID_test
 
-CA_test: $(INC_DIR)/myCA_edit.h
+CA_test:
 	$(CPP) $(CPPFLAGS) test CA_test.cpp \
 	-I$(INC_DIR) -L$(LIB_DIR) -lmyCA
 	mv test $(BIN_DIR)
+
+COVID_test:
+	$(CPP) $(CPPFLAGS) COVID_test COVID_test.cpp \
+	-I$(INC_DIR) -L$(LIB_DIR) -lmyCA
+	mv COVID_test $(BIN_DIR)
 
 all: $(TEST_EXECUTABLES)

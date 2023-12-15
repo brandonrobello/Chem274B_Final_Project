@@ -11,39 +11,39 @@ using namespace std;
 
 int main() {
 
-    int run_CA_selection = 3;
+// Iniatilization of Cellular Automata
+CellularAutomata test_CA_majority;
+MajorityRule majorityrule;
 
-if (run_CA_selection == 1){
-    CellularAutomata test_CA_majority;
-    auto majorityrule = make_unique<MajorityRule>();
+// Pushback into vector the single rule that is being used
+vector<Rule*> rules;
+rules.push_back(&majorityrule);
 
-    vector<unique_ptr<Rule>> rules;
-    rules.push_back(make_unique<MajorityRule>());
+// Instiate the output file
+string CAframe_outfile_path = "Test_CAframe_output_MajorityRule.txt";
 
-    string CAframe_outfile_path = "Test_CAframe_output_1.txt";
+// Initialize the setup of the Cellular Automata with values
+test_CA_majority.setup_dimension(2, 9, 9); // ndims, rows, cols
+test_CA_majority.setup_neighborhood(MOORE); // MOORE Neighborhood
+test_CA_majority.set_boundtype(STATIC, 1); // STATIC Boundstate 
+test_CA_majority.init_CA_state(0); // 
+test_CA_majority.init_CA_stateWprob(1, 0.50);
 
-    test_CA_majority.setup_dimension(2, 9, 9);
-    test_CA_majority.setup_neighborhood(MOORE);
-    test_CA_majority.set_boundtype(STATIC, 1);
-    test_CA_majority.init_CA_state(0);
-    test_CA_majority.init_CA_stateWprob(2, 0.45);
+for (int step = 0; step < 2; step++) {
+    cout << "Step " << step << " Frame:" << endl;
+    test_CA_majority.print();
+    test_CA_majority.record_CAframe(CAframe_outfile_path);
 
-    for (int step = 0; step < 2; step++) {
-        cout << "Step " << step << " Frame:" << endl;
-        test_CA_majority.print();
-        test_CA_majority.record_CAframe(CAframe_outfile_path);
-
-        // Convert unique_ptr to raw pointers for the update function
-        vector<Rule*> raw_rules;
-        for (auto& rule : rules) {
-            raw_rules.push_back(rule.get());
-        }
-
-        test_CA_majority.update(raw_rules);
-        cout << "After update and swap, Frame:" << endl;
-        test_CA_majority.print();
+    // Convert unique_ptr to raw pointers for the update function
+    vector<Rule*> raw_rules;
+    for (auto& rule : rules) {
+        raw_rules.push_back(rule.get());
     }
-}
+
+    test_CA_majority.update(raw_rules);
+    cout << "After update and swap, Frame:" << endl;
+    test_CA_majority.print();
+
 
 if (run_CA_selection == 2){
     CellularAutomata test_CA;
@@ -96,7 +96,7 @@ if (run_CA_selection == 3){
     string CAframe_outfile_path = "Test_CAframe_output_3.txt";
 
     
-    // Define the transition states f
+    // Define the transition states
     vector<int> transitionStates1 = {0, 3}; // Example sequenc
     StraightConditionalRule straightRule1(transitionStates1);
      vector<int> transitionStates2 = {100, 1}; // Example sequenc
