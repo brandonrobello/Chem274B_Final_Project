@@ -22,10 +22,13 @@ public:
     recoveryRule(double Rate) : recoverRate(Rate) {}; // Seed the random number generator
     
     /// Rule application  
-    int apply(Neighborhood &neighborhood) override {
+    void apply(Neighborhood &neighborhood) override {
         Cell centerCell = neighborhood.center_cell;
 
-        if (centerCell.getState_t0() == 3) { // Assuming 3 is the infected state
+        int current_t0 = neighborhood.center_cell.getState_t0();
+        int current_tx = neighborhood.center_cell.getState_tx();
+
+        if (current_t0 == INFECTED) { // Assuming 3 is the infected state
             vector<int> CCpos = centerCell.getPosition();
             int x = CCpos[0];
             int y = CCpos[1];
@@ -40,11 +43,13 @@ public:
 
             double randomValue = static_cast<double>(rand()) / RAND_MAX;
             if (randomValue <= Period_RR) {
-                return RECOVERED; 
+                centerCell.setState_tx(RECOVERED);
                 infection_period_tracker.erase(identifier); // Remove tracker from list after recovery
             }
         }
-        return centerCell.getState_t0(); // Return the current state if no change
+        if (current_tx == 0){
+            centerCell.setState_tx(current_t0);// Return the current state if no change
+        }
     }
 };
 
@@ -54,7 +59,6 @@ class VaccinationRule : public Rule {
     private:
 
         double vaccination_prob_;
-        int seed = 1;
 
     public:
 
@@ -77,7 +81,7 @@ class VaccinationRule : public Rule {
                 return HEALTHY_VACCED;
             }
             else {
-                return current_state;
+                return neighborhood.center_cell.getState_tx();
             }
         }
 };
@@ -97,10 +101,11 @@ class InfectionRule: public Rule {
         int apply(Neighborhood &neighborhood) override{
 
             int current_state = neighborhood.center_cell.getState_t0();
+            int current_state_tx = neighborhood.center_cell.getState_tx();
 
             // Skip for empty and infected cells
             if (current_state == EMPTY || current_state == INFECTED || current_state == RECOVERED) {
-                return current_state;
+                return current_state_tx;
             }
 
             int infected_count = 0;
@@ -125,7 +130,7 @@ class InfectionRule: public Rule {
                     return INFECTED;
                 }
                 else {
-                    return current_state;
+                    return current_state_tx;
                 }
             }
             // Additional immunity multiplier for vaccinated cells
@@ -134,10 +139,10 @@ class InfectionRule: public Rule {
                     return INFECTED;
                 }
                 else {
-                    return current_state;
+                    return current_state_tx;
                 }
             }
-            return current_state;
+            return current_state_tx;
         }
 };
 
@@ -156,10 +161,11 @@ class ReinfectionRule : public Rule {
         int apply(Neighborhood &neighborhood) override {
             
             int current_state = neighborhood.center_cell.getState_t0();
+            int current_state_tx = neighborhood.center_cell.getState_tx();
 
             // Skip updating for non-recovered cells
             if (current_state != RECOVERED) {
-                return current_state;
+                return current_state_tx;
             }
             
             int infected_count = 0;
@@ -184,7 +190,7 @@ class ReinfectionRule : public Rule {
                 return INFECTED;
             }
             else {
-                return current_state;
+                return current_state_tx;
             }
         }
 };
