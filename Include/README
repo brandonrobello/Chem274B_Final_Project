@@ -13,5 +13,6 @@ LIST OF SUBDIRECTORIES IN THIS DIRECTORY:
 LIST OF FILES IN THIS DIRECTORY:
 - README: (this file) contains general information of this directory
 
-- myCA.h: API to general purpose cellular atomata library
+- myCA_edit.h: API to general purpose cellular atomata library
+- myCOVID_edit.h: API to COVID modeling cellular atomata 
 		
