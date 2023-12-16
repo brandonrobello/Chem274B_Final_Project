@@ -11,5 +11,8 @@ LIST OF SUBDIRECTORIES IN THIS DIRECTORY:
 (src)
 
 LIST OF FILES IN THIS DIRECTORY:
+- Cell.cpp: the implementations of the methods of the Cell Class declared in myCA.h
+- CellularAutomata.cpp: the implementations of the methods of the CellularAutomata Class declared in myCA.h
+- Makefile: Utility targets for the cpp files above to compile an archive
 - README: (this file) contains general information of this directory
 

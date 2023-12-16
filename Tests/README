@@ -11,6 +11,7 @@ LIST OF SUBDIRECTORIES IN THIS DIRECTORY:
 (no subdirectories)
 
 LIST OF FILES IN THIS DIRECTORY:
+- CA_test.cpp - tests the CellularAutomata with predefined rules and outputs a txt file into the Bin.
+- Makefile - Utility to compile above cpp files
 - README: (this file) contains general information of this directory
 
-- CA_test.cpp - tests the CA and outputs a txt file into the Bin

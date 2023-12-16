@@ -1,12 +1,27 @@
+// Chem 274B: Software Engineering Fundamentals for Molecular Sciences
+// Creator: Brandon Robello, Curtis Wu, Radhika Sahai
+// Date Created: 12/2/23
+//
+// This source file provides the implementation of the CellularAutomata class for
+// the Cellular Automata framework. It includes functions to initialize and configure 
+// the cellular automaton, manage cell states, handle neighborhood calculations, 
+// apply rules, and record the simulation state. The CellularAutomata class is 
+// the central component that orchestrates the Cellular Automata simulation process.
+
+
 // This file is the source file for Cellular Automata
 #include <fstream>
-#include "myCA_edit.h"
+#include "myCA.h"
 
 // Consturctor and Destructor for the cellular automata
 CellularAutomata::CellularAutomata(){}
 CellularAutomata::~CellularAutomata(){}
 
+// Implementations of setup, initialization, neighborhood calculation,
+// state recording, and update functions for the cellular automata below:
+
 // Dimension and initial setup for the cellular automaton, reserves space for the cellular automaton vectors
+// setup_dimension: Configures the dimensions of the cellular automaton grid.
 int CellularAutomata::setup_dimension(int ndims, int dim1, int dim2)
 {
     if ((ndims != 1 && ndims != 2) || dim1 <= 0 || (ndims == 2 && dim2 <= 0)) {
@@ -19,13 +34,9 @@ int CellularAutomata::setup_dimension(int ndims, int dim1, int dim2)
     for (int i = 0; i < dim1; ++i) {
         if (ndims == 1) {
             grid[i].resize(1); // Single column in 1D
-            // CA.grid[i][0].resize(n_feats); // Resize each cell according to feature dimension
         } 
         else { // ndims == 2
             grid[i].resize(dim2);
-            //for (int j = 0; j < dim2; ++j) {
-                // CA.grid[i][j].resize(n_feats);
-            //}
         }
     }
     // Successful setup
@@ -37,6 +48,7 @@ int CellularAutomata::setup_dimension(int ndims, int dim1, int dim2)
 }
 
 // Neighborhood type set up for the cellular automaton
+// setup_neighborhood: Sets up the type of neighborhood used in the simulation.
 int CellularAutomata::setup_neighborhood(int neighbor_type)
 {
      // Von Neumann neighborhood type
@@ -59,6 +71,7 @@ int CellularAutomata::setup_neighborhood(int neighbor_type)
 }
 
 // Boundary type setup for the cellular automaton
+// set_boundtype: Defines the boundary conditions for the cellular automaton.
 int CellularAutomata::set_boundtype(int bound_type, int radius)
 {
     if (radius <= 0) {
@@ -89,8 +102,6 @@ int CellularAutomata::set_boundtype(int bound_type, int radius)
 // Set possible discrete states of grid's Cells
 int CellularAutomata::set_states(std::map<string, int> states)
 {
-    // sanity check / already existing states?
-
     this->states = states;
     return 0;
 }
@@ -98,17 +109,13 @@ int CellularAutomata::set_states(std::map<string, int> states)
 // Return list of possible states
 std::map<string, int> CellularAutomata::list_states() const
 {
-
-    // sanity check / already existing states?
-
     return this->states;
 }
 
 // Intializing Cells State_T0
+// init_CA_state and init_CA_stateWprob: Initializes the states of cells in the grid.
 int CellularAutomata::init_CA_state(int stat_t0) 
 {
-       // sanity check / already existing states?
-       // Default value
 
     for (int i = 0; i < dim1; ++i) {
         for (int j = 0; j < dim2; ++j) {
@@ -122,13 +129,9 @@ int CellularAutomata::init_CA_state(int stat_t0)
 }
 
 // Intializing Cells State_T0 with probability
+// init_CA_state and init_CA_stateWprob: Initializes the states of cells in the grid.
 int CellularAutomata::init_CA_stateWprob(int stat_t0, double probability) 
 {
-   // sanity check / already existing states?
-       // Default value
-
-    //srand(static_cast<unsigned int>(time(0))); // Seed for random number generation
-
     for (int i = 0; i < dim1; ++i) {
         for (int j = 0; j < dim2; ++j) {
             double randomValue = static_cast<double>(rand()) / RAND_MAX;
@@ -144,6 +147,7 @@ int CellularAutomata::init_CA_stateWprob(int stat_t0, double probability)
     return 0;
 }
 // Intializing specific Cells State_T0
+// init_Cell_state and init_Cell_stateWprob: Initializes specific cells' states.
 int CellularAutomata::init_Cell_state(int stat_t0, vector<vector<int>> coords) {
     for (const auto& coord : coords) {
         int x = coord[0];
@@ -161,7 +165,8 @@ int CellularAutomata::init_Cell_state(int stat_t0, vector<vector<int>> coords) {
     return 0;
 }
 
-// Intializing specific Cells State_T0 with probability 
+// Intializing specific Cells State_T0 with probability
+// init_Cell_state and init_Cell_stateWprob: Initializes specific cells' states.
 int CellularAutomata::init_Cell_stateWprob(int stat_t0, double probability, vector<vector<int>> coords) {
 
     for (const auto& coord : coords) {
@@ -183,7 +188,7 @@ int CellularAutomata::init_Cell_stateWprob(int stat_t0, double probability, vect
     return 0;
 }
 
-// Get neighborhood function
+// get_neighborhood: Retrieves the neighborhood of a given cell based on its position.
 Neighborhood CellularAutomata::get_neighborhood(vector<int> coord)
 {
     // Boudnary check already performed in update functions
@@ -234,10 +239,7 @@ Neighborhood CellularAutomata::get_neighborhood(vector<int> coord)
 
     return neighbor;
 }
-
-// Query the current cell states of the CA
-// int query_cellState(string filepath);
-
+// record_CAframe: Records the current frame of the cellular automaton to a file.
 // Records the current frame of the CA
 int CellularAutomata::record_CAframe(string filepath) const{
     ofstream outfile(filepath, ios::app); // Opens file in append mode
@@ -261,6 +263,7 @@ int CellularAutomata::record_CAframe(string filepath) const{
     return 0;
 }
 
+// print: Outputs the current state of the cellular automaton to the console.
 void CellularAutomata::print() const{
     for (int x = 0; x < dim1; x++) {
         for (int y = 0; y < dim2; y++) {
@@ -270,7 +273,7 @@ void CellularAutomata::print() const{
     }
 }
 
-// Method to swap staes from tx to after recording for each new update
+// swapState: Updates the state of each cell after applying rules.
 int CellularAutomata::swapState() {
     for (int i = 0; i < dim1; i++) {
         for (int j = 0; j < dim2; j++) {
@@ -281,7 +284,7 @@ int CellularAutomata::swapState() {
     return 0; // Return 0 to indicate successful execution
 }
 
-// Function that drives the timestep updates using vector of rules function
+// update: Applies a set of rules to the cellular automaton for a timestep.
 int CellularAutomata::update(vector<Rule*>& rules) {
     for (Rule* rule : rules) {
         for (int i = 0; i < dim1; i++) {
@@ -297,7 +300,7 @@ int CellularAutomata::update(vector<Rule*>& rules) {
     return 0;
 }
 
-// Function that drives the timestep updates using 1 rule function
+// update: Applies a set of rules to the cellular automaton for a timestep.
 int CellularAutomata::update(Rule& rule) {
     
     for (int i = 0; i < dim1; i++) {
@@ -312,7 +315,7 @@ int CellularAutomata::update(Rule& rule) {
     return 0;
 }
 
-// Query the current cell states of the CA
+// query_cellState and record_cellState: Query and record the state frequency of cells.
 std::map<int, int> CellularAutomata::query_cellState()
 {
         // Map for storing frequency of states
@@ -325,7 +328,7 @@ std::map<int, int> CellularAutomata::query_cellState()
         }
         return frequencyMap;
 }
-// Query the current cell states of the CA
+// query_cellState and record_cellState: Query and record the state frequency of cells.
 int CellularAutomata::record_cellState(string filepath){
     ofstream outfile(filepath, ios::app); // Opens file in append mode
 

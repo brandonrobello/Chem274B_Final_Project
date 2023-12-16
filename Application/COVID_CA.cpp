@@ -1,3 +1,18 @@
+// Chem 274B: Software Engineering Fundamentals for Molecular Sciences
+// Creators:  Brandon Robello, Curtis Wu, Radhika Sahai
+// Date Created: 12/2/23
+//
+// This file contains the main C++ program for running Cellular Automata
+// simulations with specific rules simulating the spread and control of
+// COVID-19. It utilizes the classes and functions defined in 'myCA.h'
+// and 'COVID.h' to create a dynamic simulation environment. The script
+// sets up the Cellular Automata with initial states, defines various
+// rules like vaccination, infection, recovery, and reinfection, and runs
+// the simulation for a specified number of steps, recording the state
+// of the Automata at each step. The outputs are stored in text files for
+// further analysis.
+
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -5,10 +20,9 @@
 #include <vector>
 #include <thread>
 #include <chrono>
-#include <memory> // For std::unique_ptr
 using namespace std;
-#include "myCA_edit.h"
-#include "COVID_edit.h"
+#include "myCA.h"
+#include "COVID.h"
 
 int main(){
     srand(static_cast<unsigned int>(time(0)));
@@ -63,57 +77,3 @@ int main(){
     
 return 0;
 }
-
-
-
-
-/*
-CellularAutomata COVID_test_CA;
-    string CAframe_outfile_path = "Test_COVID_CAframe_output.txt";
-    string CAcellState_outfile_path = "Test_COVID_CAcellState_output.txt";
-    
-    // Define the transition states
-    CovidSusceptibilityRule rule;
-
-    vector<Rule*> rules;
-    rules.push_back(&rule);
-    ;
-
-    // Setup the CA
-    COVID_test_CA.setup_dimension(2, 9, 9);
-    COVID_test_CA.setup_neighborhood(MOORE);
-    COVID_test_CA.set_boundtype(STATIC, 1);
-
-    // Initialize states
-    COVID_test_CA.init_CA_state(0);
-    std::cout << "Wait for 3 seconds..." << endl;
-    
-    COVID_test_CA.init_CA_stateWprob(3, 0.20);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    COVID_test_CA.init_CA_stateWprob(4, 0.20);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    COVID_test_CA.init_CA_stateWprob(2, 0.025);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    COVID_test_CA.init_CA_stateWprob(1, 0.025);
-    
-    
-
-    // Run the CA for a certain number of steps
-    for (int step = 0; step < 5; step++)
-    {
-        
-        cout << "Step " << step << endl;
-        COVID_test_CA.record_CAframe(CAframe_outfile_path);
-        COVID_test_CA.print();
-        auto COVID_cellstates =  COVID_test_CA.query_cellState();
-        for (auto& state : COVID_cellstates) {
-        
-        cout << state.first << "," << state.second << "\t";
-        }
-        cout << endl;
-        COVID_test_CA.record_cellState(CAcellState_outfile_path);
-
-        COVID_test_CA.update(rules);                
-    }
-
-*/
