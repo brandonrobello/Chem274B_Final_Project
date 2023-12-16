@@ -34,10 +34,18 @@ vector<int> Cell::getPosition() const
     return vector<int>{this->x, this->y};
 }
 
-// Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
+// Method to swap state_tx and state_t0, to make the new value (tx) the current value (t0)
 void Cell::cell_update()
 {
-    this->state_t0 = this->state_tx;
+    // SENTINEL value set in cell declaration myCA_edit.h
+    // No change to current state
+    if (this->state_tx == SENTINEL){
+       // If state_tx is SENTINEL, do nothing
+    }
+    else{
+        this->state_t0 = this->state_tx;
+        this->state_tx = SENTINEL;
+    }
 }
 
 
