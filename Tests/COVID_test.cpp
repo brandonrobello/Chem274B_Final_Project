@@ -24,10 +24,10 @@ int main(){
     ReinfectionRule ReinfectRule(0.7, 0.25); // 70% infection rate and 0.5 recovery immunity multiplier for vaccination
 
     vector<Rule*> rules;
+    rules.push_back(&ReinfectRule);
     rules.push_back(&VacRule);
     rules.push_back(&InfectRule);
     rules.push_back(&RecovRule);
-    rules.push_back(&ReinfectRule);
 
     // Setup the CA
     COVID_test_CA.setup_dimension(2, 9, 9); // 2 dims, 9x9 matrix

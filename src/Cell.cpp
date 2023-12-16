@@ -38,7 +38,6 @@ vector<int> Cell::getPosition() const
 void Cell::cell_update()
 {
     this->state_t0 = this->state_tx;
-    void;
 }
 
 
