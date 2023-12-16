@@ -18,7 +18,7 @@ int main(){
     
     // Define the transition states
     CellularAutomata COVID_test_CA;
-    VaccinationRule VacRule(0.25); // 25% vaccination rate
+    VaccinationRule VacRule(0.5); // 25% vaccination rate
     InfectionRule InfectRule(0.9, 0.25); // 70% infection rate and 0.5 immunity multiplier for vaccination
     recoveryRule RecovRule(0.30); //50% recover rate
     ReinfectionRule ReinfectRule(0.7, 0.25); // 70% infection rate and 0.5 recovery immunity multiplier for vaccination
@@ -37,7 +37,7 @@ int main(){
     // Initialize states
     COVID_test_CA.init_CA_state(0); // Initialize all states to 0 empty space
     COVID_test_CA.init_CA_stateWprob(1, 0.50); // Initialize to 50% healthy individuals
-    COVID_test_CA.init_CA_stateWprob(3, 0.05); // Initialize 5% of cells as infected
+    COVID_test_CA.init_CA_stateWprob(3, 0.1); // Initialize 5% of cells as infected
     
     
     
