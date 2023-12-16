@@ -1,8 +1,20 @@
-// Implementation of Cellular Automata Cell Class
-#include "myCA_edit.h"
+// Chem 274B: Software Engineering Fundamentals for Molecular Sciences
+// Creator: Brandon Robello, Curtis Wu, Radhika Sahai
+// Date Created: 12/2/23
+//
+// This file provides the implementation of the Cell class for the Cellular Automata 
+// framework. It includes methods for managing the state of a cell, accessing its 
+// position within the grid, and updating its state based on the applied rules. 
+// The Cell class serves as a fundamental building block for the Cellular Automata simulation.
+
+#include "myCA.h"
 
 Cell::Cell() {}
 Cell::~Cell() {}
+
+// Implementations of getters and setters for cell state and position
+// Methods include getState_t0, setState_t0, getState_tx, setState_tx,
+// getPosition, set_x, set_y, get_x, get_y.
 
 // Cell state t0 getter
 int Cell::getState_t0() const
@@ -34,7 +46,9 @@ vector<int> Cell::getPosition() const
     return vector<int>{this->x, this->y};
 }
 
-// Method to swap state_tx and state_t0, to make the new value (tx) the current value (t0)
+// cell_update: Method to update the state of the cell. Swaps state_tx and state_t0 
+// to reflect the new state of the cell after applying a rule. The SENTINEL value 
+// is used to indicate no change in state.
 void Cell::cell_update()
 {
     // SENTINEL value set in cell declaration myCA_edit.h
@@ -47,7 +61,6 @@ void Cell::cell_update()
         this->state_tx = SENTINEL;
     }
 }
-
 
 void Cell::set_x(int x) 
 {
@@ -63,7 +76,7 @@ int Cell::get_x() const {return this->x;}
 
 int Cell::get_y() const {return this->y;}
 
-
+// Operator overloading for Cell comparison, used in the Neighborhood structure.
 bool Cell::operator<(const Cell& other) const 
 {
     if (x != other.x) return x < other.x;

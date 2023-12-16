@@ -1,4 +1,13 @@
-
+// Chem 274B: Software Engineering Fundamentals for Molecular Sciences
+// Creator: Radhika Sahai, Brandon Robello, Curtis Wu
+// Date Created: 12/2/23
+//
+// This header file defines the classes and structures for implementing
+// a Cellular Automata framework. It includes definitions for the Cell class,
+// Neighborhood structure, abstract Rule class, and various specific rule
+// classes that dictate the behavior of cells in a Cellular Automata simulation.
+// The file encompasses the core functionality required to model complex systems
+// through cellular automata.
 
 #pragma once    // Ensures that this file is only included once
                 // during compilation
@@ -11,18 +20,18 @@
 
 using namespace std;
 
-#define SENTINEL        -100
+#define SENTINEL        -100    // Special value indicating no change in state
 
+// Class representing a single cell in the cellular automata grid.
 class Cell {
     private:
-        int x; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
-        int y; // The x position on the grid / position from center in the neighborhood (important for the Activation-Inhibition rule)
+        int x; // The x position on the grid / position from center in the neighborhood 
+        int y; // The x position on the grid / position from center in the neighborhood 
         int state_t0; // Intitial state of the cell 
         int state_tx = SENTINEL; // Updated state of the cell
 
     public:
         Cell();
-        //add copy constructor for neighborhood
         ~Cell();
         int getState_t0() const; // Method to get current state
         int setState_t0(int state); // Methof to set current state
@@ -32,7 +41,6 @@ class Cell {
         vector<int> getPosition() const; // Method to get x and y positions
 
         void cell_update(); // Method to swap state_tx and state_to, to make the new value (tx) the current value (t0)
-        // Implemented to fulfill requirements for map in neighborhood
         bool operator<(const Cell& other) const;
         void set_x(int x);
         void set_y(int y);
@@ -40,6 +48,7 @@ class Cell {
         int get_y() const;
 };
 
+// Structure representing the neighborhood of a cell in the grid.
 struct Neighborhood
 {   
     public:
@@ -48,14 +57,12 @@ struct Neighborhood
     Cell* center_cell;       // Copy of the center cell of the neighborhood 
 };
 
+// Abstract class representing a general rule in cellular automata.
 class Rule {
 public:
     virtual void apply(Neighborhood &neighborhood) = 0;
     virtual ~Rule() {}
 };
-
-//Curtis
-
 
 class CellularAutomata
 {
@@ -98,13 +105,10 @@ class CellularAutomata
 
         // Query the current cell states of the CA
         std::map<int, int> query_cellState();
+        // Records the current frame of the CA CellStates
         int record_cellState(string filepath);
-
-        //Alternatively could combine the three functions below into one method for one loop
         // Records the current frame of the CA
         int record_CAframe(string filepath) const;
-        // Records the current cell states of the CA
-        //int record_CellState(string filepath) const;
         
         // Method to swap staes from tx to after recording for each new update
         int swapState();
@@ -123,6 +127,14 @@ class CellularAutomata
 #define PERIODIC    5
 #define MAJORITY    6
 #define PARITY      7
+
+
+// Specific rule implementations follow:
+// MajorityRule, StraightConditionalRule, TransitionConditionalRule,
+// ParityRule, ActivationInhibitionRule, etc.
+
+// Each rule class contains the implementation of the apply method that
+// dictates how the rule affects the state of a cell based on its neighborhood.
 
 
 // Rule for majority rule that returns update value

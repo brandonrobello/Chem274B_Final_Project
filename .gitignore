@@ -31,6 +31,9 @@
 *.out
 *.app
 
+# txt files
+*.txt
+
 # Mac and vscode
 .DS_Store
 .vscode/

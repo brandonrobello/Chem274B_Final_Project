@@ -4,16 +4,15 @@
 # 
 # Creator:  Radhika Sahai, Brandon Robello, Curtis Wu
 # Date Created: December 13, 2023
-# Directory Path: Chem274B_Final_Project/Bin
+# Directory Path: Chem274B_Final_Project/Application
 
 
 LIST OF SUBDIRECTORIES IN THIS DIRECTORY:
 (no subdirectories)
 
 LIST OF FILES IN THIS DIRECTORY:
-- This directory will house binary compiled executibles
-- This directory will house the txt outputs of compiled executibles
+- COVID_CA.cpp: An executable file of a cellular automata representing infectious disease (COVID)
+- Makefile: Utility to compile executible file
 - README: (this file) contains general information of this directory
 
 Contains the object files from the tests
-
