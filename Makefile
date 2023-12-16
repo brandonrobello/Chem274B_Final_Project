@@ -23,5 +23,9 @@ test:
 
 run:
 	cd $(BIN_DIR); ./COVID_test; cd ..
+	cd $(BIN_DIR); ./CA_test; cd ..
 
 all: $(TEST_EXECUTABLES)
+
+clean:
+	cd $(BIN_DIR); rm -f *.txt

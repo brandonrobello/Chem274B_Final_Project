@@ -127,7 +127,7 @@ int CellularAutomata::init_CA_stateWprob(int stat_t0, double probability)
    // sanity check / already existing states?
        // Default value
 
-    srand(static_cast<unsigned int>(time(0))); // Seed for random number generation
+    //srand(static_cast<unsigned int>(time(0))); // Seed for random number generation
 
     for (int i = 0; i < dim1; ++i) {
         for (int j = 0; j < dim2; ++j) {
@@ -163,7 +163,6 @@ int CellularAutomata::init_Cell_state(int stat_t0, vector<vector<int>> coords) {
 
 // Intializing specific Cells State_T0 with probability 
 int CellularAutomata::init_Cell_stateWprob(int stat_t0, double probability, vector<vector<int>> coords) {
-    srand(static_cast<unsigned int>(time(0))); // Seed for random number generation
 
     for (const auto& coord : coords) {
         int x = coord[0];
@@ -282,7 +281,7 @@ int CellularAutomata::swapState() {
     return 0; // Return 0 to indicate successful execution
 }
 
-// Function that drives the timestep updates using rule function
+// Function that drives the timestep updates using vector of rules function
 int CellularAutomata::update(vector<Rule*>& rules) {
     for (Rule* rule : rules) {
         for (int i = 0; i < dim1; i++) {
@@ -294,6 +293,21 @@ int CellularAutomata::update(vector<Rule*>& rules) {
             }
         }  
     }
+    swapState();
+    return 0;
+}
+
+// Function that drives the timestep updates using 1 rule function
+int CellularAutomata::update(Rule& rule) {
+    
+    for (int i = 0; i < dim1; i++) {
+        for (int j = 0; j < dim2; j++) {
+        
+        Neighborhood neighborhood = get_neighborhood({i, j});
+        rule.apply(neighborhood);
+        //grid[i][j].setState_tx(newState);
+        }
+    }  
     swapState();
     return 0;
 }

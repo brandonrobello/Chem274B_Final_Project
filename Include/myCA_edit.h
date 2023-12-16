@@ -109,7 +109,9 @@ class CellularAutomata
         // Method to swap staes from tx to after recording for each new update
         int swapState();
         // Function that drive the timestep updates using a vector of rules
-        int update(vector<Rule*>& rules);       
+        int update(vector<Rule*>& rules);
+        // Function that drives the timestep updates using 1 rule function
+        int update(Rule& rule);      
         // Print the CA to console for debugging
         void print() const;
 };
@@ -122,11 +124,11 @@ class CellularAutomata
 #define MAJORITY    6
 #define PARITY      7
 
-/*
+
 // Rule for majority rule that returns update value
 class MajorityRule : public Rule {
 public:
-    int apply(Neighborhood &neighborhood) override {
+    void apply(Neighborhood &neighborhood) override {
         // Map for storing frequency of states
         std::map<int, int> frequencyMap;
 
@@ -134,7 +136,6 @@ public:
         for (const auto &cellEntry : neighborhood.subgrid) {
             const Cell &cell = cellEntry.first;
             frequencyMap[cell.getState_t0()]++;
-            // cout<<"Increments frequency of state "<<cell.getState_t0()<<" while searching position ("<<cell.get_x()<<","<<cell.get_y()<<")"<<endl;
         }
 
         // Determine the state with the maximum frequency
@@ -147,7 +148,10 @@ public:
             }
         }
 
-        return maxFrequencyValue;
+        int newState  = maxFrequencyValue;
+
+        neighborhood.center_cell->setState_tx(newState);
+
     }
 };
 
@@ -161,20 +165,17 @@ class StraightConditionalRule : public Rule {
         StraightConditionalRule(const vector<int>& transition_state_list) 
             : transition_states(transition_state_list) {}
 
-        int apply(Neighborhood &neighborhood) override {
-            const Cell& centerCell = neighborhood.center_cell; // Use the center cell
-            int currentState = centerCell.getState_t0();
-
+        void apply(Neighborhood &neighborhood) override {
+            // Use the center cell
             // Iterate through the transition states to find the next state
             for (size_t i = 0; i < transition_states.size(); ++i) {
-                if (transition_states[i] == currentState) {
+                if (transition_states[i] == neighborhood.center_cell->getState_t0()) {
                     // If current state is found, return the next state in the vector
-                    return (i < transition_states.size() - 1) ? transition_states[i + 1] : transition_states[0];
+                    int newState = (i < transition_states.size() - 1) ? transition_states[i + 1] : transition_states[0];
+                    neighborhood.center_cell->setState_tx(newState);
                 }
             }
 
-            // Default behavior if state not found in transition_states
-            return currentState; 
         }
 
         // Function to set the straight conditional transition list
@@ -185,7 +186,7 @@ class StraightConditionalRule : public Rule {
 
 
 // Rule for conditional transition based on a neighbor's state
-class NeighborConditionalRule : public Rule {
+class TransitionConditionalRule : public Rule {
     private:
         int trigger_state; // State of the cell that triggers the change
         int neighbor_target_state; // Target state of the neighbor to cause the change
@@ -193,15 +194,12 @@ class NeighborConditionalRule : public Rule {
 
     public:
         //+ Constructor to include a trigger state, neighbor_target_state, and new_state
-        NeighborConditionalRule(int trigger_state, int neighbor_target_state, int new_state)
+        TransitionConditionalRule(int trigger_state, int neighbor_target_state, int new_state)
             : trigger_state(trigger_state), neighbor_target_state(neighbor_target_state), new_state(new_state) {}
 
-        int apply(Neighborhood &neighborhood) override {
-            const Cell& centerCell = neighborhood.center_cell;
-            int currentState = centerCell.getState_t0();
-
+        void apply(Neighborhood &neighborhood) override {
             // Check if the center cell is in the trigger state
-            if (currentState == trigger_state) {
+            if (neighborhood.center_cell->getState_t0() == trigger_state) {
                 // Check the states of neighboring cells
                 for (const auto& neighborEntry : neighborhood.subgrid) {
                     const Cell& neighborCell = neighborEntry.first;
@@ -209,15 +207,52 @@ class NeighborConditionalRule : public Rule {
 
                     // If a neighbor is in the target state, change the state of the center cell
                     if (neighborState == neighbor_target_state) {
-                        return new_state;
+                        neighborhood.center_cell->setState_tx(new_state);
                     }
                 }
             }
-
-            // If no change is required, return the current state
-            return currentState;
         }
 };
+
+// Rule for parity transition
+class ParityRule : public Rule {
+private:
+    int targetState; // The state to check for in neighbors
+    int newStateEven; // New state if the count is even
+    int newStateOdd; // New state if the count is odd
+
+public:
+    // Constructor
+    ParityRule(int targetState, int newStateEven, int newStateOdd)
+        : targetState(targetState), newStateEven(newStateEven), newStateOdd(newStateOdd) {}
+
+    void apply(Neighborhood &neighborhood) override {
+        // Count neighbors in the target state
+        int count = 0;
+        for (const auto &cellEntry : neighborhood.subgrid) {
+            if (cellEntry.first.getState_t0() == targetState) {
+                count++;
+            }
+        }
+
+        // Calculate parity (0 for even, 1 for odd)
+        int parity = count % 2;
+
+        // Set new state based on the parity
+        neighborhood.center_cell->setState_tx(parity == 0 ? newStateEven : newStateOdd);
+    }
+
+    // Setters and getters
+    void setTargetState(int state) {
+        this->targetState = state;
+    }
+
+    int getTargetState() const {
+        return this->targetState;
+    }
+};
+
+
 
 // Rule for Activation-Inhibition conditional
 class ActivationInhibitionRule : public Rule {
@@ -239,7 +274,7 @@ public:
           distanceWeights(distanceWeights) {}
 
     // Calculates the activation and inhibition effects on a cell based on the states of its neighbors.
-    int apply(Neighborhood &neighborhood) override {
+    void apply(Neighborhood &neighborhood) override {
         double activeWeightedSum = 0;
         double inhibitoryWeightedSum = 0;
 
@@ -260,13 +295,10 @@ public:
 
         // Determine the cell's next state based on the activation/inhibition thresholds.
         if (activeWeightedSum > activationThreshold && inhibitoryWeightedSum < inhibitionThreshold) {
-            return activeState;  // Cell becomes active.
+            neighborhood.center_cell->setState_tx(activeState); // Cell new state is active.
         } else if (inhibitoryWeightedSum > inhibitionThreshold) {
-            return inactiveState;  // Cell becomes inactive.
+            neighborhood.center_cell->setState_tx(inactiveState); // Cell becomes inactive.
         }
-
-        // If neither condition is met, return the current state.
-        return neighborhood.center_cell.getState_t0();
     }
 
     // setDistanceWeights: Updates the distanceWeights map to change influence dynamics.
@@ -277,41 +309,4 @@ public:
 
 
 
-// Rule for parity transition
-class ParityRule : public Rule {
-private:
-    int targetState; // The state to check for in neighbors
-    int newStateEven; // New state if the count is even
-    int newStateOdd; // New state if the count is odd
 
-public:
-    // Constructor
-    ParityRule(int targetState, int newStateEven, int newStateOdd)
-        : targetState(targetState), newStateEven(newStateEven), newStateOdd(newStateOdd) {}
-
-    int apply(Neighborhood &neighborhood) override {
-        // Count neighbors in the target state
-        int count = 0;
-        for (const auto &cellEntry : neighborhood.subgrid) {
-            if (cellEntry.first.getState_t0() == targetState) {
-                count++;
-            }
-        }
-
-        // Calculate parity (0 for even, 1 for odd)
-        int parity = count % 2;
-
-        // Return the new state based on the parity
-        return parity == 0 ? newStateEven : newStateOdd;
-    }
-
-    // Setters and getters
-    void setTargetState(int state) {
-        this->targetState = state;
-    }
-
-    int getTargetState() const {
-        return this->targetState;
-    }
-};
-*/
